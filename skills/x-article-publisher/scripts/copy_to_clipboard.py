@@ -157,9 +157,11 @@ def copy_image_to_clipboard_windows(image_path: str, quality: int = None) -> boo
 
         # Copy to clipboard
         win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
-        win32clipboard.CloseClipboard()
+        try:
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+        finally:
+            win32clipboard.CloseClipboard()
 
         return True
 
