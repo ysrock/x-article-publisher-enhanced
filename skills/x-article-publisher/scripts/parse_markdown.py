@@ -239,7 +239,8 @@ def markdown_to_html(markdown: str) -> str:
     html = html.replace('\\[', '[').replace('\\]', ']')
     # Unescape backslashes \\ -> \ (Pandoc escapes backslashes)
     html = html.replace('\\\\', '\\')
-    # Unescape other common chars
+    # Unescape other common chars that Pandoc might escape unnecessarily for X
+    html = html.replace('\\*', '*').replace('\\_', '_')
     html = html.replace('\\+', '+').replace('\\-', '-').replace('\\.', '.')
     
     # Remove superscript carets ^8^ -> 8
