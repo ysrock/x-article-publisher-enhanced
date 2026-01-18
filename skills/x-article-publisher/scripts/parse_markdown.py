@@ -196,13 +196,33 @@ def markdown_to_html(markdown: str) -> str:
     html = markdown
 
     # Process code blocks first (marked with ___CODE_BLOCK_START___ and ___CODE_BLOCK_END___)
-    # Convert to blockquote format since X Articles doesn't support <pre><code>
+    # Extract language and use pre/code with blockquote for better formatting
     def convert_code_block(match):
         code_content = match.group(1)
         lines = code_content.strip().split('\n')
-        # Join non-empty lines with <br> for display
-        formatted = '<br>'.join(line for line in lines if line.strip())
-        return f'<blockquote>{formatted}</blockquote>'
+        
+        # Extract language from first line (if any)
+        language = ''
+        if lines and not lines[0].strip().startswith(('#', '//', '/*', 'import', 'from', 'def', 'class')):
+            # Check if first line looks like a language identifier
+            first_line = lines[0].strip()
+            if first_line and len(first_line) < 20 and ' ' not in first_line:
+                language = first_line
+                lines = lines[1:]  # Remove language line from content
+        
+        # Escape HTML
+        escaped_lines = []
+        for line in lines:
+            escaped = line.replace('<', '&lt;').replace('>', '&gt;')
+            escaped_lines.append(escaped)
+        
+        formatted = '<br>'.join(escaped_lines)
+        
+        # Build HTML with language label and pre/code structure
+        lang_class = f' class="language-{language}"' if language else ''
+        lang_label = f'<p><strong>{language}</strong></p>' if language else ''
+        
+        return f'{lang_label}<blockquote><pre><code{lang_class}>{formatted}</code></pre></blockquote>'
 
     html = re.sub(r'___CODE_BLOCK_START___(.*?)___CODE_BLOCK_END___', convert_code_block, html, flags=re.DOTALL)
 

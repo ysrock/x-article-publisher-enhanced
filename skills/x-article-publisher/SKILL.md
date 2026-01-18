@@ -284,7 +284,7 @@ textbox [ref=xxx]:
 
 - H2 headers (## )
 - Blockquotes (> )
-- Code blocks (``` ... ```) - converted to blockquotes since X doesn't support `<pre><code>`
+- Code blocks (``` ... ```) - with language label and pre/code structure
 - Bold text (**)
 - Hyperlinks ([text](url))
 - Ordered lists (1. 2. 3.)
