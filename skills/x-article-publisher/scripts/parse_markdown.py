@@ -226,9 +226,24 @@ def markdown_to_html(markdown: str) -> str:
 
     html = re.sub(r'___CODE_BLOCK_START___(.*?)___CODE_BLOCK_END___', convert_code_block, html, flags=re.DOTALL)
 
+    # Support H4-H6 (convert to bold paragraph with breaks)
+    # H3 in X Articles looks okay, but deeper levels should be just bold text
+    html = re.sub(r'^####+ (.+)$', r'<p><strong>\1</strong></p>', html, flags=re.MULTILINE)
+
     # Headers (H2 only, H1 is title)
     html = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
     html = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
+    
+    # Clean up Pandoc artifacts
+    # Unescape brackets \[ \] -> [ ]
+    html = html.replace('\\[', '[').replace('\\]', ']')
+    # Unescape backslashes \\ -> \ (Pandoc escapes backslashes)
+    html = html.replace('\\\\', '\\')
+    # Unescape other common chars
+    html = html.replace('\\+', '+').replace('\\-', '-').replace('\\.', '.')
+    
+    # Remove superscript carets ^8^ -> 8
+    html = re.sub(r'\^([^\^]+)\^', r'\1', html)
 
     # Bold
     html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html)
