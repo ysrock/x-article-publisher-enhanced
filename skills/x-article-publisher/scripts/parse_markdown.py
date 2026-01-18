@@ -245,11 +245,13 @@ def markdown_to_html(markdown: str) -> str:
     # Remove superscript carets ^8^ -> 8
     html = re.sub(r'\^([^\^]+)\^', r'\1', html)
 
-    # Bold
-    html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html)
+    # Bold (non-greedy match, single line)
+    # Use negative lookbehind to avoid matching escaped ** (\**)
+    html = re.sub(r'(?<!\\)\*\*(.+?)(?<!\\)\*\*', r'<strong>\1</strong>', html)
 
-    # Italic
-    html = re.sub(r'\*([^*]+)\*', r'<em>\1</em>', html)
+    # Italic (exclude newlines to prevent spanning paragraphs)
+    # Fix: [^*\n] ensures we don't match across newlines or consume *
+    html = re.sub(r'(?<!\\)\*([^*\n]+)(?<!\\)\*', r'<em>\1</em>', html)
 
     # Links
     html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', html)
