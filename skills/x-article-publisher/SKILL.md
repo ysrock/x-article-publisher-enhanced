@@ -19,6 +19,10 @@ Publish Markdown content to X (Twitter) Articles editor, preserving formatting w
 
 Located in `~/.claude/skills/x-article-publisher/scripts/`:
 
+## Repository
+
+**Enhanced Version (Supports Code Block Syntax Highlighting)**:
+[https://github.com/ysrock/x-article-publisher-enhanced](https://github.com/ysrock/x-article-publisher-enhanced)
 ### parse_markdown.py
 Parse Markdown and extract structured data:
 ```bash
