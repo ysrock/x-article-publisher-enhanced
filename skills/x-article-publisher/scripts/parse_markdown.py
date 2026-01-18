@@ -246,13 +246,27 @@ def markdown_to_html(markdown: str) -> str:
     # Remove superscript carets ^8^ -> 8
     html = re.sub(r'\^([^\^]+)\^', r'\1', html)
 
-    # Bold (non-greedy match, single line)
-    # Use negative lookbehind to avoid matching escaped ** (\**)
-    html = re.sub(r'(?<!\\)\*\*(.+?)(?<!\\)\*\*', r'<strong>\1</strong>', html)
+    # Helper to clean whitespace in matches
+    def clean_format(match, tag):
+        content = match.group(1)
+        # Replace newlines and multiple spaces with single space
+        content = re.sub(r'\s+', ' ', content)
+        return f'<{tag}>{content}</{tag}>'
 
-    # Italic (exclude newlines to prevent spanning paragraphs)
-    # Fix: [^*\n] ensures we don't match across newlines or consume *
-    html = re.sub(r'(?<!\\)\*([^*\n]+)(?<!\\)\*', r'<em>\1</em>', html)
+    # Bold (non-greedy match, DOTALL to allow newlines)
+    # Use negative lookbehind to avoid matching escaped ** (\**)
+    html = re.sub(r'(?<!\\)\*\*(.+?)(?<!\\)\*\*', lambda m: clean_format(m, 'strong'), html, flags=re.DOTALL)
+
+    # Italic (exclude newlines to prevent spanning paragraphs? NO, we want to allow wrapping)
+    # But be careful about greediness.
+    # Pandoc wrapping usually indents the next line. 
+    # We use DOTALL but restrict lookahead to ensure we don't eat too much?
+    # Actually, non-greedy .+? should be fine as long as we assume closing * exists.
+    # To be safe properly, we can require that the match doesn't contain double newline (paragraph break).
+    # content = ([^(\n\n)]+?) 
+    # But regex . matches \n.
+    # Let's match anything that is NOT a double newline
+    html = re.sub(r'(?<!\\)\*((?:(?!\n\n).)+?)(?<!\\)\*', lambda m: clean_format(m, 'em'), html, flags=re.DOTALL)
 
     # Links
     html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', html)
