@@ -257,14 +257,18 @@ def markdown_to_html(markdown: str) -> str:
     # Blockquotes (regular markdown blockquotes, not code blocks)
     html = re.sub(r'^> (.+)$', r'<blockquote>\1</blockquote>', html, flags=re.MULTILINE)
 
-    # Unordered lists
-    html = re.sub(r'^- (.+)$', r'<li>\1</li>', html, flags=re.MULTILINE)
+    # Unordered lists with continuation lines (indented)
+    # Match "- " line, then optional following lines that start with spaces
+    html = re.sub(r'^- (.+?)((?:\n  .+)*)$', r'<li>\1\2</li>', html, flags=re.MULTILINE)
 
-    # Ordered lists
-    html = re.sub(r'^\d+\. (.+)$', r'<li>\1</li>', html, flags=re.MULTILINE)
+    # Ordered lists with continuation lines
+    html = re.sub(r'^\d+\. (.+?)((?:\n  .+)*)$', r'<li>\1\2</li>', html, flags=re.MULTILINE)
 
-    # Wrap consecutive <li> in <ul>
-    html = re.sub(r'((?:<li>.*?</li>\n?)+)', r'<ul>\1</ul>', html)
+    # Wrap consecutive <li> in <ul> (Note: regex matches text between li's now too?)
+    # We need to be careful. The previous regex joined consecutive li's.
+    # If there are newlines inside li, they are now part of li. 
+    # But consecutive li blocks might still be separated by \n.
+    html = re.sub(r'((?:<li>.*?</li>\n?)+)', r'<ul>\1</ul>', html, flags=re.DOTALL)
 
     # Paragraphs - split by double newlines
     parts = html.split('\n\n')
